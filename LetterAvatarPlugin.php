@@ -96,7 +96,7 @@ class LetterAvatarPlugin extends Gdn_Plugin {
     /**
      * Dashboard settings page.
      *
-     * @param SettingsController $sender instance of the calling class.
+     * @param SettingsController $sender Instance of the calling class.
      *
      * @return void.
      */
@@ -105,13 +105,14 @@ class LetterAvatarPlugin extends Gdn_Plugin {
         $sender->setHighlightRoute('settings/plugins');
 
         $sender->setData('Title', Gdn::translate('Letter Avatar Settings'));
+        $sender->setData('Description', Gdn::translate('Letter Avatar Description'));
 
         $configurationModule = new ConfigurationModule($sender);
 
         $options = [
             'Plugins.LetterAvatar.SVG' => [
                 'LabelCode' => 'Custom SVG',
-                'Description' => 'You can design the look of your avatars. It must be a valid SVG where %1$s stands for the letter and %2$s is for the color.',
+                'Description' => 'You can design the look of your avatars. It must be a valid SVG where %1$s stands for the letter text and %2$s is for the backgrounds fill color.',
                 'Control' => 'TextBox',
                 'Options' => ['MultiLine' => true]
             ],
@@ -140,22 +141,20 @@ class LetterAvatarPlugin extends Gdn_Plugin {
             ]
         ];
 
-        $configurationModule->initialize($options);
-
         if (Gdn::request()->isAuthenticatedPostBack()) {
-            // Loop through all settings and save arrays directly to config.
-            $formValues = $configurationModule->form()->formValues();
-            if ($formValues['Plugins.LetterAvatar.Reset']) {
-                // reset all avatars
-            }
-            unset($formValues['Plugins.LetterAvatar.Reset']);
-            foreach ($formValues as $key => $value) {
-                if (substr($key, 0, 8) !== 'Plugins.' || !is_array($value)) {
-                    continue;
-                }
-                Gdn::config()->saveToConfig($key, array_values($value));
+            // Check if current avatars should be cleaned.
+            if ($configurationModule->form()->getValue('Plugins.LetterAvatar.Reset')) {
+                Gdn::sql()
+                    ->like('Name', 'Plugin.LetterAvatar.%')
+                    ->delete('UserMeta');
+                $configurationModule->form()->setFormValue(
+                    'Plugins.LetterAvatar.Reset',
+                    false
+                );
+                $sender->informMessage(Gdn::translate('All existing avatars have been reset'));
             }
         }
+        $configurationModule->initialize($options);
         $configurationModule->renderAll();
     }
 }
@@ -174,8 +173,6 @@ if (!function_exists('userPhotoDefaultUrl')) {
         }
 
         $userInfo = LetterAvatarPlugin::getUserInfo($user);
-        // $letter = LetterAvatarPlugin::getLetter($user);
-        // $color = LetterAvatarPlugin::getColor($user);
         $svg = sprintf(
             LetterAvatarPlugin::getSvg(),
             $userInfo['Letter'],
