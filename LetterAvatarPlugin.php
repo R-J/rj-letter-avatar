@@ -39,68 +39,15 @@ class LetterAvatarPlugin extends Gdn_Plugin {
     }
 
     /**
-     * Fetch color from user Attributes or create a color.
+     * Fetch Letter and Color from UserMeta or create them.
      *
-     * @param object $user The user
+     * @param object $user The user for which to create the avatar.
      *
-     * @return string The color code for the avatar.
+     * @return array Letter and Color.
      */
-    public static function getColor($user) {
-        // Check if there is a color set in the user attributes.
-        if ($user->Attributes['LetterAvatarColor'] ?? false) {
-            return $user->Attributes['LetterAvatarColor'];
-        }
-        if (Gdn::config('Plugins.LetterAvatar.UsePalette', false)) {
-            // If a palette should be used, fetch a random entry.
-            $palette = explode(',', Gdn::config('Plugins.LetterAvatar.Palette'));
-            $colorCount = count($palette);
-            $color = $palette[rand(0, $colorCount -1)];
-        } else {
-            $color = "#".dechex(rand(0, 16777000));
-        }
-        Gdn::getContainer()->get(UserModel::class)->saveAttribute(
-            $user->UserID,
-            'LetterAvatarColor',
-            $color
-        );
-        return $color;
-    }
-
-    /**
-     * Fetch letter form user Attributes or create it.
-     *
-     * @param object $user The user
-     *
-     * @return string The letter(s) for the avatar.
-     */
-    public static function getLetter($user) {
-        // Check if there is a letter set in the user attributes
-        if ($user->Attributes['LetterAvatar'] ?? false) {
-            return $user->Attributes['LetterAvatar'];
-        }
-        $name = trim($user->Name);
-        $nameParts = array_values(array_filter(explode(' ', $name)));
-        if (count($nameParts) > 1) {
-            // Name contains spaces: "John Doe" => "JD".
-            $letter = substr($nameParts[0], 0, 1).substr($nameParts[1], 0, 1);
-        } elseif (Gdn::config('Plugins.LetterAvatar.UseTwoLetters', true)) {
-            // Show two letters instead of one: "John" => "Jo".
-            $letter = substr($nameParts[0], 0, 2);
-        } else {
-            // Simple default: "John" => "J".
-            $letter = substr($nameParts[0], 0, 1);
-        }
-        Gdn::getContainer()->get(UserModel::class)->saveAttribute(
-            $user->UserID,
-            'LetterAvatar',
-            $letter
-        );
-        return $letter;
-    }
-
     public static function getUserInfo($user) {
-        $userMetaModel = Gdn::getContainer()->get(UserMetaModel::class);
         // Try to fetch info from UserMeta first.
+        $userMetaModel = Gdn::getContainer()->get(UserMetaModel::class);
         $userInfo = $userMetaModel->getUserMeta($user->UserID, 'Plugin.LetterAvatar.%');
 
         // Try to fetch letter from UserMeta first.
@@ -126,7 +73,6 @@ class LetterAvatarPlugin extends Gdn_Plugin {
         }
 
         // Try to fetch color from UserMeta first.
-        // $color = $userMetaModel->getUserMeta($user->UserID, 'Plugin.LetterAvatar.Color', false);
         $color = $userInfo['Plugin.LetterAvatar.Color'] ?? false;
         if ($color == false) {
             if (Gdn::config('Plugins.LetterAvatar.UsePalette', false)) {
@@ -146,6 +92,7 @@ class LetterAvatarPlugin extends Gdn_Plugin {
 
         return ['Letter' => $letter, 'Color' => $color];
     }
+
     /**
      * Dashboard settings page.
      *

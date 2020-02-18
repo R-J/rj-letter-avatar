@@ -4,7 +4,7 @@
     "name": "Letter Avatar",
     "description": "Use user names capital letter(s) as their avatar",
     "license": "MIT",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "settingsUrl": "/settings/letteravatar",
     "pluginUrl": "https://github.com/r-j/rj-letter-avatar",
     "authors": [
