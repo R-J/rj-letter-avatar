@@ -1,0 +1,25 @@
+{
+    "type": "addon",
+    "key": "rj-letter-avatar",
+    "name": "Letter Avatar",
+    "description": "Use user names capital letter(s) as their avatar",
+    "license": "MIT",
+    "version": "0.0.1",
+    "settingsUrl": "/settings/letteravatar",
+    "pluginUrl": "https://github.com/r-j/rj-letter-avatar",
+    "authors": [
+        {
+            "name": "Robin Jurinka",
+            "homepage": "https://open.vanillaforums.com/profile/r_j"
+        }
+    ],
+    "priority": 10,
+    "className": "LetterAvatarPlugin",
+    "hasLocale": true,
+    "mobileFriendly": true,
+    "usePopupSettings": false,
+    "requiredTheme": false,
+    "requiredPlugin": false,
+    "allowDisable": true,
+    "hidden": false
+}
